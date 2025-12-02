@@ -1,8 +1,8 @@
-# sundog
+# {{crate}}
 
-Current version: 0.1.0
+Current version: {{version}}
 
-
+{{readme}}
 
 ## Colophon
 

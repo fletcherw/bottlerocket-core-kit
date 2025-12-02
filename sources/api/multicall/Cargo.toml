@@ -1,0 +1,20 @@
+[package]
+name = "multicall"
+version = "0.1.0"
+authors = ["Fletcher Woodruff <fwood@amazon.com>"]
+license = "(Apache-2.0 OR MIT) AND MIT"
+edition = "2021"
+publish = false
+build = "build.rs"
+# Don't rebuild crate just because of changes to README.
+exclude = ["README.md"]
+
+[dependencies]
+pluto.workspace = true
+snafu.workspace = true
+sundog.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tokio-retry.workspace = true
+
+[build-dependencies]
+generate-readme.workspace = true

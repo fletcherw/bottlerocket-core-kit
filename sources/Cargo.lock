@@ -3744,6 +3744,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "multicall"
+version = "0.1.0"
+dependencies = [
+ "generate-readme",
+ "pluto",
+ "snafu",
+ "sundog",
+ "tokio",
+ "tokio-retry",
+]
+
+[[package]]
 name = "netdog"
 version = "0.1.0"
 dependencies = [
