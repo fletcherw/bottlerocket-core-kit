@@ -665,6 +665,9 @@ for p in \
   ln -s multicall %{buildroot}%{_cross_bindir}/${p}
 done
 
+# FIXME big hack this is not real
+ln -s multicall %{buildroot}%{_cross_fips_bindir}/pluto
+
 install -d %{buildroot}%{_cross_sbindir}
 for p in \
   xfs_admin xfs_info \
