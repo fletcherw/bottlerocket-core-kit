@@ -93,6 +93,7 @@ Requires: %{_cross_os}settings-committer
 Requires: %{_cross_os}signpost
 Requires: %{_cross_os}storewolf
 Requires: %{_cross_os}sundog
+Requires: %{_cross_os}multicall
 Requires: %{_cross_os}xfscli
 Requires: %{_cross_os}thar-be-settings
 
@@ -144,6 +145,11 @@ Conflicts: (%{_cross_os}image-feature(no-fips) or %{_cross_os}apiclient-bin)
 %package -n %{_cross_os}sundog
 Summary: Updates settings dynamically based on user-specified generators
 %description -n %{_cross_os}sundog
+%{summary}.
+
+%package -n %{_cross_os}multicall
+Summary: TODO
+%description -n %{_cross_os}multicall
 %{summary}.
 
 %package -n %{_cross_os}bork
@@ -535,10 +541,12 @@ fips_pid="$!"
 exec 1>&3 2>&4
 
 # Run non-static builds in the foreground.
+# FIXME we need two versions of sundog
 echo "** Output from non-static builds:"
 %cargo_build --manifest-path %{_builddir}/sources/Cargo.toml \
     -p apiserver \
     -p sundog \
+    -p multicall \
     -p schnauzer \
     -p bork \
     -p thar-be-settings \
@@ -614,7 +622,7 @@ install -d %{buildroot}%{_cross_bindir}
 install -d %{buildroot}%{_cross_fips_bindir}
 for p in \
   apiserver \
-  sundog schnauzer bork \
+  multicall schnauzer bork \
   corndog thar-be-settings thar-be-updates host-containers \
   storewolf settings-committer \
   migrator prairiedog certdog \
@@ -643,11 +651,18 @@ for p in \
 done
 
 for p in \
-  pluto \
   cfsignal \
 ; do
   install -p -m 0755 %{__cargo_outdir_aws_sdk}/${p} %{buildroot}%{_cross_bindir}
   install -p -m 0755 %{__cargo_outdir_aws_sdk_fips}/${p} %{buildroot}%{_cross_fips_bindir}
+done
+
+# Create symlinks for config binaries to enable multicall
+for p in \
+  pluto \
+  sundog \
+; do
+  ln -s multicall %{buildroot}%{_cross_bindir}/${p}
 done
 
 install -d %{buildroot}%{_cross_sbindir}
@@ -789,8 +804,12 @@ install -p -m 0644 %{S:400} %{S:401} %{S:402} %{buildroot}%{_cross_licensedir}
 %{_cross_templatedir}/corndog-toml
 
 %files -n %{_cross_os}sundog
-%{_cross_bindir}/sundog
 %{_cross_unitdir}/sundog.service
+
+%files -n %{_cross_os}multicall
+%{_cross_bindir}/multicall
+%{_cross_bindir}/sundog
+%{_cross_bindir}/pluto
 
 %files -n %{_cross_os}schnauzer
 %{_cross_bindir}/schnauzer
