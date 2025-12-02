@@ -541,7 +541,7 @@ fips_pid="$!"
 exec 1>&3 2>&4
 
 # Run non-static builds in the foreground.
-# FIXME we need two versions of sundog
+# FIXME we need two versions of sundog for FIPS
 echo "** Output from non-static builds:"
 %cargo_build --manifest-path %{_builddir}/sources/Cargo.toml \
     -p apiserver \
@@ -658,12 +658,16 @@ for p in \
 done
 
 # Create symlinks for config binaries to enable multicall
-for p in \
-  pluto \
-  sundog \
-; do
-  ln -s multicall %{buildroot}%{_cross_bindir}/${p}
-done
+# FIXME uncomment
+#for p in \
+#  pluto \
+#  sundog \
+#; do
+#  ln -s multicall %{buildroot}%{_cross_bindir}/${p}
+#done
+
+ln -s multicall %{buildroot}%{_cross_bindir}/sundog
+ln -s multicall %{buildroot}%{_cross_bindir}/pluto
 
 # FIXME big hack this is not real
 ln -s multicall %{buildroot}%{_cross_fips_bindir}/pluto

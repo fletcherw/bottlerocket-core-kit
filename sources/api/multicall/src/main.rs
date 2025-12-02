@@ -3,6 +3,8 @@ use std::{env, process};
 
 
 mod error {
+    use std::path::PathBuf;
+
     use snafu::Snafu;
 
     #[derive(Debug, Snafu)]
@@ -17,14 +19,23 @@ mod error {
         #[snafu(display("current executable is not valid utf-8"))]
         InvalidName,
 
-        #[snafu(display("multicall binary doesn't support binary: {}", binary))]
-        UnsupportedBinary{ binary: String },
+        #[snafu(display("multicall binary doesn't support binary: {} at path: {}", binary, path.display()))]
+        UnsupportedBinary{
+            binary: String,
+            path: PathBuf,
+         },
 
         #[snafu(display(
             "running sundog failed: {}",
             source
         ))]
         Sundog { source: sundog::SundogError },
+
+        #[snafu(display(
+            "running pluto failed: {}",
+            source
+        ))]
+        Pluto { source: Box<dyn std::error::Error> },
     }
 }
 
@@ -34,10 +45,10 @@ async fn run() -> std::result::Result<(), MulticallError> {
     let binary_path = env::current_exe().context(error::CurrentExeSnafu)?;
     let binary_name = binary_path.file_name().context(error::MissingNameSnafu)?.to_str().context(error::InvalidNameSnafu)?;
     match binary_name {
-        "pluto" => unimplemented!(),
+        "pluto" => pluto::run().await.context(error::PlutoSnafu),
         "sundog" => sundog::run().await.context(error::SundogSnafu),
         _ => {
-            Err(error::MulticallError::UnsupportedBinary{ binary: binary_name.to_owned() })
+            Err(error::MulticallError::UnsupportedBinary{ binary: binary_name.to_owned(), path: binary_path })
         }
     }
 }
