@@ -56,6 +56,7 @@ Source122: has-boot-ever-succeeded.service
 Source123: pluto.service
 Source124: bootstrap-commands.service
 Source125: whippet.service
+Source126: multicall-prefetch.service
 
 # 2xx sources: tmpfilesd configs
 Source200: migration-tmpfiles.conf
@@ -766,7 +767,7 @@ install -p -m 0644 \
   %{S:100} %{S:102} %{S:103} %{S:105} \
   %{S:106} %{S:107} %{S:110} %{S:111} %{S:112} \
   %{S:113} %{S:114} %{S:120} %{S:122} %{S:123} %{S:124} \
-  %{S:125} \
+  %{S:125} %{S:126} \
   %{buildroot}%{_cross_unitdir}
 
 install -p -m 0644 %{S:10} %{buildroot}%{_cross_templatedir}
@@ -826,6 +827,7 @@ install -p -m 0644 %{S:400} %{S:401} %{S:402} %{buildroot}%{_cross_licensedir}
 %{_cross_unitdir}/sundog.service
 
 %files -n %{_cross_os}multicall
+%{_cross_unitdir}/multicall-prefetch.service
 
 %files -n %{_cross_os}multicall-bin
 %{_cross_bindir}/multicall

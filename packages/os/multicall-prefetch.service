@@ -1,0 +1,19 @@
+[Unit]
+Description=Prefetch binary for config
+After=apiserver.service
+# We don't want to restart the unit if the network goes offline or apiserver restarts
+Wants=apiserver.service
+# Block manual interactions with this service, since it could leave the system in an
+# unexpected state
+RefuseManualStart=true
+RefuseManualStop=true
+
+[Service]
+Type=oneshot
+# expected to break
+ExecStart=-/usr/bin/multicall
+RemainAfterExit=true
+StandardError=journal+console
+
+[Install]
+RequiredBy=preconfigured.target
