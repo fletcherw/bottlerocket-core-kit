@@ -663,7 +663,7 @@ install -d %{buildroot}%{_cross_libexecdir}/brush/allowed-programs
 
 for p in \
   logdog migrator metricdog \
-  shibaken updog multicall\
+  shibaken updog \
 ; do
   install -p -m 0755 %{__cargo_outdir_fips}/${p} %{buildroot}%{_cross_fips_bindir}
 done
