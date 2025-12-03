@@ -42,7 +42,7 @@ mod error {
 use error::MulticallError;
 
 async fn run() -> std::result::Result<(), MulticallError> {
-    let binary_path = env::args().next().context(error::CurrentExeSnafu)?.into();
+    let binary_path: std::path::PathBuf = env::args().next().context(error::MissingNameSnafu)?.into();
     let binary_name = binary_path.file_name().context(error::MissingNameSnafu)?.to_str().context(error::InvalidNameSnafu)?;
     match binary_name {
         "pluto" => pluto::run().await.context(error::PlutoSnafu),
