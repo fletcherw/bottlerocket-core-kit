@@ -677,16 +677,12 @@ for p in \
 done
 
 # Create symlinks for config binaries to enable multicall
-# FIXME uncomment
-#for p in \
-#  pluto \
-#  sundog \
-#; do
-#  ln -s multicall %{buildroot}%{_cross_bindir}/${p}
-#done
-
-ln -s multicall %{buildroot}%{_cross_bindir}/sundog
-ln -s multicall %{buildroot}%{_cross_bindir}/pluto
+for p in \
+  pluto \
+  sundog \
+; do
+  ln -s multicall %{buildroot}%{_cross_bindir}/${p}
+done
 
 # weird but fine I guess?
 ln -s multicall %{buildroot}%{_cross_fips_bindir}/pluto
