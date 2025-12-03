@@ -149,7 +149,24 @@ Summary: Updates settings dynamically based on user-specified generators
 
 %package -n %{_cross_os}multicall
 Summary: TODO
+Requires: %{_cross_os}multicall(binaries)
 %description -n %{_cross_os}multicall
+%{summary}.
+
+%package -n %{_cross_os}multicall-bin
+Summary: TODO multicall
+Provides: %{_cross_os}multicall(binaries)
+Requires: (%{_cross_os}image-feature(no-fips) and %{_cross_os}multicall)
+Conflicts: (%{_cross_os}image-feature(fips) or %{_cross_os}multicall-fips-bin)
+%description -n %{_cross_os}multicall-bin
+%{summary}.
+
+%package -n %{_cross_os}multicall-fips-bin
+Summary: TODO multicall
+Provides: %{_cross_os}multicall(binaries)
+Requires: (%{_cross_os}image-feature(fips) and %{_cross_os}multicall)
+Conflicts: (%{_cross_os}image-feature(no-fips) or %{_cross_os}multicall-bin)
+%description -n %{_cross_os}multicall-fips-bin
 %{summary}.
 
 %package -n %{_cross_os}bork
@@ -509,6 +526,7 @@ exec 1>"${aws_sdk_output}" 2>&1
   %cargo_build_aws_sdk --manifest-path %{_builddir}/sources/Cargo.toml \
   -p pluto \
   -p cfsignal \
+  -p multicall \
   &
 # Save the PID so we can wait for it later.
 aws_sdk_pid="$!"
@@ -520,6 +538,7 @@ exec 1>"${fips_aws_sdk_output}" 2>&1
   %cargo_build_fips_aws_sdk --manifest-path %{_builddir}/sources/Cargo.toml \
   -p pluto \
   -p cfsignal \
+  -p multicall \
   &
 # Save the PID so we can wait for it later.
 fips_aws_sdk_pid="$!"
@@ -546,7 +565,6 @@ echo "** Output from non-static builds:"
 %cargo_build --manifest-path %{_builddir}/sources/Cargo.toml \
     -p apiserver \
     -p sundog \
-    -p multicall \
     -p schnauzer \
     -p bork \
     -p thar-be-settings \
@@ -622,7 +640,7 @@ install -d %{buildroot}%{_cross_bindir}
 install -d %{buildroot}%{_cross_fips_bindir}
 for p in \
   apiserver \
-  multicall schnauzer bork \
+  schnauzer bork \
   corndog thar-be-settings thar-be-updates host-containers \
   storewolf settings-committer \
   migrator prairiedog certdog \
@@ -637,9 +655,6 @@ for p in \
   install -p -m 0755 %{__cargo_outdir}/${p} %{buildroot}%{_cross_bindir}
 done
 
-# FIXME hack
-install -p -m 0755 %{__cargo_outdir}/multicall %{buildroot}%{_cross_fips_bindir}
-
 # Create symlink for schnauzer-v2 to enable multicall behavior
 ln -s schnauzer %{buildroot}%{_cross_bindir}/schnauzer-v2
 
@@ -648,12 +663,13 @@ install -d %{buildroot}%{_cross_libexecdir}/brush/allowed-programs
 
 for p in \
   logdog migrator metricdog \
-  shibaken updog \
+  shibaken updog multicall\
 ; do
   install -p -m 0755 %{__cargo_outdir_fips}/${p} %{buildroot}%{_cross_fips_bindir}
 done
 
 for p in \
+  multicall \
   cfsignal \
 ; do
   install -p -m 0755 %{__cargo_outdir_aws_sdk}/${p} %{buildroot}%{_cross_bindir}
@@ -672,7 +688,7 @@ done
 ln -s multicall %{buildroot}%{_cross_bindir}/sundog
 ln -s multicall %{buildroot}%{_cross_bindir}/pluto
 
-# FIXME big hack this is not real
+# weird but fine I guess?
 ln -s multicall %{buildroot}%{_cross_fips_bindir}/pluto
 
 install -d %{buildroot}%{_cross_sbindir}
@@ -817,9 +833,15 @@ install -p -m 0644 %{S:400} %{S:401} %{S:402} %{buildroot}%{_cross_licensedir}
 %{_cross_unitdir}/sundog.service
 
 %files -n %{_cross_os}multicall
+
+%files -n %{_cross_os}multicall-bin
 %{_cross_bindir}/multicall
 %{_cross_bindir}/sundog
 %{_cross_bindir}/pluto
+
+%files -n %{_cross_os}multicall-fips-bin
+%{_cross_fips_bindir}/multicall
+%{_cross_fips_bindir}/pluto
 
 %files -n %{_cross_os}schnauzer
 %{_cross_bindir}/schnauzer
@@ -940,10 +962,8 @@ install -p -m 0644 %{S:400} %{S:401} %{S:402} %{buildroot}%{_cross_licensedir}
 %{_cross_datadir}/eks/eni-max-pods
 
 %files -n %{_cross_os}pluto-bin
-%{_cross_bindir}/pluto
 
 %files -n %{_cross_os}pluto-fips-bin
-%{_cross_fips_bindir}/pluto
 
 %files -n %{_cross_os}prairiedog
 %{_cross_bindir}/prairiedog

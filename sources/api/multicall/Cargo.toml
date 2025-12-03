@@ -9,8 +9,14 @@ build = "build.rs"
 # Don't rebuild crate just because of changes to README.
 exclude = ["README.md"]
 
+[features]
+fips = ["aws-lc-rs/fips", "aws-smithy-experimental/crypto-aws-lc-fips", "rustls/fips"]
+
 [dependencies]
+aws-lc-rs = { workspace = true, features = ["bindgen"] }
+aws-smithy-experimental = {workspace = true, features = ["crypto-aws-lc"]}
 pluto.workspace = true
+rustls.workspace = true
 snafu.workspace = true
 sundog.workspace = true
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
