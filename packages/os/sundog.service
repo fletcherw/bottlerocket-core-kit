@@ -12,7 +12,7 @@ RefuseManualStop=true
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/sundog
+ExecStart=@/usr/bin/multicall /usr/bin/sundog
 RemainAfterExit=true
 StandardError=journal+console
 

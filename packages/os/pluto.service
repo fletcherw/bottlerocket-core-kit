@@ -17,7 +17,7 @@ RefuseManualStop=true
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/pluto
+ExecStart=@/usr/bin/multicall /usr/bin/pluto
 RemainAfterExit=true
 StandardError=journal+console
 
