@@ -11,7 +11,7 @@ RefuseManualStop=true
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/thar-be-settings --all
+ExecStart=@/usr/bin/multicall /usr/bin/thar-be-settings --all
 RemainAfterExit=true
 StandardError=journal+console
 

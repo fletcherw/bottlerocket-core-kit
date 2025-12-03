@@ -536,7 +536,6 @@ exec 3>&1 4>&2
 fips_aws_sdk_output="$(mktemp)"
 exec 1>"${fips_aws_sdk_output}" 2>&1
   %cargo_build_fips_aws_sdk --manifest-path %{_builddir}/sources/Cargo.toml \
-  -p pluto \
   -p cfsignal \
   -p multicall \
   &
@@ -560,14 +559,11 @@ fips_pid="$!"
 exec 1>&3 2>&4
 
 # Run non-static builds in the foreground.
-# FIXME we need two versions of sundog for FIPS
 echo "** Output from non-static builds:"
 %cargo_build --manifest-path %{_builddir}/sources/Cargo.toml \
     -p apiserver \
-    -p sundog \
     -p schnauzer \
     -p bork \
-    -p thar-be-settings \
     -p thar-be-updates \
     -p host-containers \
     -p storewolf \
@@ -641,7 +637,7 @@ install -d %{buildroot}%{_cross_fips_bindir}
 for p in \
   apiserver \
   schnauzer bork \
-  corndog thar-be-settings thar-be-updates host-containers \
+  corndog thar-be-updates host-containers \
   storewolf settings-committer \
   migrator prairiedog certdog \
   signpost updog metricdog logdog \
@@ -680,6 +676,7 @@ done
 for p in \
   pluto \
   sundog \
+  thar-be-settings \
 ; do
   ln -s multicall %{buildroot}%{_cross_bindir}/${p}
 done
@@ -834,6 +831,7 @@ install -p -m 0644 %{S:400} %{S:401} %{S:402} %{buildroot}%{_cross_licensedir}
 %{_cross_bindir}/multicall
 %{_cross_bindir}/sundog
 %{_cross_bindir}/pluto
+%{_cross_bindir}/thar-be-settings
 
 %files -n %{_cross_os}multicall-fips-bin
 %{_cross_fips_bindir}/multicall
@@ -847,7 +845,6 @@ install -p -m 0644 %{S:400} %{S:401} %{S:402} %{buildroot}%{_cross_licensedir}
 %{_cross_bindir}/bork
 
 %files -n %{_cross_os}thar-be-settings
-%{_cross_bindir}/thar-be-settings
 %{_cross_unitdir}/settings-applier.service
 
 %files -n %{_cross_os}thar-be-updates

@@ -109,6 +109,7 @@ storewolf = { version = "0.1", path = "api/storewolf" }
 sundog = { version = "0.1", path = "api/sundog" }
 simple-settings-plugin = { version = "0.1", path = "api/simple-settings-plugin" }
 systemd-derive = { version = "0.1", path = "netdog/systemd-derive" }
+thar-be-settings = { version = "0.1", path = "api/thar-be-settings" }
 thar-be-updates = { version = "0.1", path = "api/thar-be-updates" }
 update_metadata = { version = "0.1", path = "updater/update_metadata" }
 schnauzer = { version = "0.1", path = "api/schnauzer" }

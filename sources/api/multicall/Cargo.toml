@@ -19,6 +19,7 @@ pluto.workspace = true
 rustls.workspace = true
 snafu.workspace = true
 sundog.workspace = true
+thar-be-settings.workspace = true
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 tokio-retry.workspace = true
 

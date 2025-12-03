@@ -10,10 +10,7 @@ mod error {
     #[derive(Debug, Snafu)]
     #[snafu(visibility(pub(super)))]
     pub(super) enum MulticallError {
-        #[snafu(display("couldn't get name of executable: {}", source))]
-        CurrentExe{ source: std::io::Error },
-
-        #[snafu(display("current executable is not a file"))]
+        #[snafu(display("binary was executed without a name"))]
         MissingName,
 
         #[snafu(display("current executable is not valid utf-8"))]
@@ -36,6 +33,12 @@ mod error {
             source
         ))]
         Pluto { source: Box<dyn std::error::Error> },
+
+        #[snafu(display(
+            "running thar-be-settings failed: {}",
+            source
+        ))]
+        TharBeSettings { source: Box<dyn std::error::Error> },
     }
 }
 
@@ -47,6 +50,7 @@ async fn run() -> std::result::Result<(), MulticallError> {
     match binary_name {
         "pluto" => pluto::run().await.context(error::PlutoSnafu),
         "sundog" => sundog::run().await.context(error::SundogSnafu),
+        "thar-be-settings" => thar_be_settings::run(thar_be_settings::parse_args(env::args())).await.context(error::TharBeSettingsSnafu),
         _ => {
             Err(error::MulticallError::UnsupportedBinary{ binary: binary_name.to_owned(), path: binary_path })
         }
