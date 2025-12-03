@@ -637,6 +637,9 @@ for p in \
   install -p -m 0755 %{__cargo_outdir}/${p} %{buildroot}%{_cross_bindir}
 done
 
+# FIXME hack
+install -p -m 0755 %{__cargo_outdir}/multicall %{buildroot}%{_cross_fips_bindir}
+
 # Create symlink for schnauzer-v2 to enable multicall behavior
 ln -s schnauzer %{buildroot}%{_cross_bindir}/schnauzer-v2
 
