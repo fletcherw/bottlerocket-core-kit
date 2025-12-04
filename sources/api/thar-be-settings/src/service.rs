@@ -3,7 +3,7 @@ use itertools::join;
 use snafu::{ensure, OptionExt, ResultExt};
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
-use std::process::Command;
+use tokio::process::Command;
 
 // TODO: thar-be-settings isn't used as a library; declare its modules in main rather than lib so
 // we don't have to expose helper types like this just so we can call related functions in main.
@@ -134,23 +134,50 @@ where
 }
 
 /// Call the `restart()` method on each Service in a Services object
-pub fn restart_services(services: Services) -> Result<()> {
-    for (name, service) in services.0 {
+pub async fn restart_services(services: Services) -> Result<()> {
+    let mut restarts = Vec::new();
+    for (name, service) in services.0.into_iter() {
         debug!("Checking for restart-commands for {name}");
-        service.restart()?;
+        restarts.push(tokio::spawn(service.restart()));
     }
+
+    for f in restarts {
+        f.await.context(error::JoinSnafu)?.context(error::RestartSnafu)?;
+    }
+
     Ok(())
 }
+
+mod service_error {
+    use std::io;
+
+    use snafu::Snafu;
+
+    #[derive(Debug, Snafu)]
+    #[snafu(visibility(pub(crate)))]
+    pub enum Error {
+        #[snafu(display("Failed to run restart command - '{}': {}", command, source))]
+        CommandExecutionFailure { command: String, source: io::Error },
+
+        #[snafu(display("Restart command is invalid (empty, space prefix, etc.) - {}", command))]
+        InvalidRestartCommand { command: String },
+
+        #[snafu(display("Restart command failed - '{}': {}", command, stderr))]
+        FailedRestartCommand { command: String, stderr: String },
+    }
+}
+
+pub use service_error::Error;
 
 /// This trait is primarily meant to extend the Service model.  It uses the metadata
 /// inside the Service struct to restart the service.
 trait ServiceRestart {
     /// Restart the service
-    fn restart(&self) -> Result<()>;
+    async fn restart(self) -> std::result::Result<(), service_error::Error>;
 }
 
 impl ServiceRestart for Service {
-    fn restart(&self) -> Result<()> {
+    async fn restart(self) -> std::result::Result<(), service_error::Error> {
         let restart_commands = &self.model.restart_commands;
         info!("restart commands {restart_commands:?}");
         for restart_command in restart_commands {
@@ -160,7 +187,7 @@ impl ServiceRestart for Service {
             let mut command_strings = restart_command.split(' ');
             let command = command_strings
                 .next()
-                .context(error::InvalidRestartCommandSnafu {
+                .context(service_error::InvalidRestartCommandSnafu {
                     command: restart_command.as_str(),
                 })?;
             trace!("Command: {}", &command);
@@ -176,26 +203,29 @@ impl ServiceRestart for Service {
             }
             let result = process_command
                 .output()
-                .context(error::CommandExecutionFailureSnafu {
+                .await
+                .context(service_error::CommandExecutionFailureSnafu {
                     command: restart_command.as_str(),
                 })?;
 
             // If the restart command exited nonzero, call it a failure
             ensure!(
                 result.status.success(),
-                error::FailedRestartCommandSnafu {
+                service_error::FailedRestartCommandSnafu {
                     command: restart_command.as_str(),
                     stderr: String::from_utf8_lossy(&result.stderr),
                 }
             );
-            trace!(
-                "Command stdout: {}",
-                String::from_utf8_lossy(&result.stdout)
-            );
-            trace!(
-                "Command stderr: {}",
-                String::from_utf8_lossy(&result.stderr)
-            );
+            if log_enabled!(log::Level::Trace) {
+                trace!(
+                    "Command stdout: {}",
+                    String::from_utf8_lossy(&result.stdout)
+                );
+                trace!(
+                    "Command stderr: {}",
+                    String::from_utf8_lossy(&result.stderr)
+                );
+            }
         }
         Ok(())
     }

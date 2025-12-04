@@ -183,7 +183,7 @@ async fn run(args: Args) -> Result<(), Box<dyn std::error::Error>> {
 
             // Now go bounce the affected services
             info!("Restarting affected services...");
-            service::restart_services(services)?;
+            service::restart_services(services).await?;
         }
         RunMode::All => {
             write_config_files(&args, None).await?;
@@ -191,7 +191,7 @@ async fn run(args: Args) -> Result<(), Box<dyn std::error::Error>> {
             info!("Restarting all services...");
             let services = service::get_affected_services(&args.socket_path, None).await?;
             trace!("Found services: {services:?}");
-            service::restart_services(services)?;
+            service::restart_services(services).await?;
         }
     }
 

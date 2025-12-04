@@ -1,8 +1,11 @@
 use core::num;
 use http::StatusCode;
 use snafu::Snafu;
+use tokio::task::JoinError;
 use std::io;
 use std::path::PathBuf;
+
+use crate::service;
 
 /// Potential errors during configuration application
 #[derive(Debug, Snafu)]
@@ -40,12 +43,6 @@ pub enum Error {
 
     #[snafu(display("Reload command failed - '{}': {}", command, stderr))]
     FailedReloadCommand { command: String, stderr: String },
-
-    #[snafu(display("Restart command failed - '{}': {}", command, stderr))]
-    FailedRestartCommand { command: String, stderr: String },
-
-    #[snafu(display("Restart command is invalid (empty, space prefix, etc.) - {}", command))]
-    InvalidRestartCommand { command: String },
 
     #[snafu(display("Configuration file '{}' failed to render: {}", template, source))]
     TemplateRender {
@@ -86,5 +83,15 @@ pub enum Error {
     GetJson {
         uri: String,
         source: schnauzer::v1::Error,
+    },
+
+    #[snafu(display("Error joining restart task: {}", source))]
+    Join {
+        source: JoinError,
+    },
+
+    #[snafu(display("Service restart: {}", source))]
+    Restart {
+        source: service::Error,
     },
 }

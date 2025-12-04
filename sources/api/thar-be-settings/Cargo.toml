@@ -22,7 +22,7 @@ schnauzer.workspace = true
 serde_json.workspace = true
 simplelog.workspace = true
 snafu.workspace = true
-tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "process"] }
 
 [build-dependencies]
 generate-readme.workspace = true
